@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.product.dao.EditionDao">
+    
+	<sql id="editionColumns">
+		a.id AS "id",
+		a.product AS "product",
+		a.iteration AS "iteration",
+		a.editionnum AS "editionNum",
+		a.createman AS "createMan",
+		a.date AS "date",
+		a.codeaddress AS "codeAddress",
+		a.loadaddress AS "loadAddress",
+		a.create_by AS "createBy.name",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.name",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag"
+	</sql>
+	
+	<sql id="editionJoins">
+		
+		LEFT JOIN sys_user u ON u.name=a.create_by
+		LEFT JOIN sys_office o ON o.id = u.office_id
+	</sql>
+	
+    
+	<select id="get" resultType="Edition" >
+		SELECT 
+			<include refid="editionColumns"/>
+		FROM zt_edition a
+		<include refid="editionJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="Edition" >
+		SELECT 
+			<include refid="editionColumns"/>
+		FROM zt_edition a
+		<include refid="editionJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>
+		${sqlMap.dsfss}
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="Edition" >
+		SELECT 
+			<include refid="editionColumns"/>
+		FROM zt_edition a
+		<include refid="editionJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>
+				
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO zt_edition(
+			<!-- id, -->
+			product,
+			iteration,
+			editionnum,
+			createman,
+			date,
+			codeaddress,
+			loadaddress,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag
+		) VALUES (
+			<!-- #{id}, -->
+			#{product},
+			#{iteration},
+			#{editionNum},
+			#{createMan},
+			#{date},
+			#{codeAddress},
+			#{loadAddress},
+			#{createBy.name},
+			#{createDate},
+			#{updateBy.name},
+			#{updateDate},
+			#{remarks},
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE zt_edition SET 	
+			product = #{product},
+			iteration = #{iteration},
+			editionnum = #{editionNum},
+			createman = #{createMan},
+			date = #{date},
+			codeaddress = #{codeAddress},
+			loadaddress = #{loadAddress},
+			update_by = #{updateBy.name},
+			update_date = #{updateDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM zt_edition
+		WHERE id = #{id}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE zt_edition SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="Edition" statementType="STATEMENT">
+		select * FROM zt_edition  where ${propertyName} = '${value}'
+	</select>
+	
+</mapper>

@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.product.dao.ProductDao">
+    
+	<sql id="productColumns">
+		a.id AS "id",
+		a.name AS "name",
+		a.pro_manager AS "proManager",
+		a.test_manager AS "testManager",
+		a.issue_manager AS "issueManager",
+		a.pro_status AS "status",
+		a.pro_type AS "type",
+		a.pro_describe AS "describe",
+		a.iteration AS "iteration",
+		a.interview AS "interview",
+		a.create_by AS "createBy.name",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.name",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag"
+	</sql>
+	
+	<sql id="productJoins">
+	</sql>
+	
+    
+	<select id="get" resultType="Product" >
+		SELECT 
+			<include refid="productColumns"/>
+		FROM zt_product a
+		<include refid="productJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="Product" >
+		SELECT 
+			<include refid="productColumns"/>
+		FROM zt_product a
+		<include refid="productJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="name != null and name != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+			</if>
+			<if test="status != null and status != ''">
+				AND a.pro_status = #{status}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="Product" >
+		SELECT 
+			<include refid="productColumns"/>
+		FROM zt_product a
+		<include refid="productJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO zt_product(
+			<!-- id, -->
+			name,
+			pro_manager,
+			test_manager,
+			issue_manager,
+			pro_status,
+			pro_type,
+			pro_describe,
+			iteration,
+			interview,
+			create_by.name,
+			create_date,
+			update_by.name,
+			update_date,
+			remarks,
+			del_flag
+		) VALUES (
+			<!-- #{id}, -->
+			#{name},
+			#{proManager},
+			#{testManager},
+			#{issueManager},
+			#{status},
+			#{type},
+			#{describe},
+			#{iteration},
+			#{interview},
+			#{createBy.name},
+			#{createDate},
+			#{updateBy.name},
+			#{updateDate},
+			#{remarks},
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE zt_product SET 	
+			name = #{name},
+			pro_manager = #{proManager},
+			test_manager = #{testManager},
+			issue_manager = #{issueManager},
+			pro_status = #{status},
+			pro_type = #{type},
+			pro_describe = #{describe},
+			iteration = #{iteration},
+			interview = #{interview},
+			update_by = #{updateBy.name},
+			update_date = #{updateDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM zt_product
+		WHERE id = #{id}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE zt_product SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="Product" statementType="STATEMENT">
+		select * FROM zt_product  where ${propertyName} = '${value}'
+	</select>
+	
+</mapper>
